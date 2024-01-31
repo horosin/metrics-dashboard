@@ -2,8 +2,8 @@ name: Fetch X Data
 
 on:
   schedule:
-    # Runs at 00:00 UTC every day
-    - cron: "0 0 * * *"
+    # Runs at 4 AM UTC (5 AM in Poland during Standard Time)
+    - cron: '0 4 * * *'
   workflow_dispatch: # This line enables manual triggering of the action
 
 jobs:
