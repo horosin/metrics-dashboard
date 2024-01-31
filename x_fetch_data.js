@@ -46,6 +46,10 @@ const fetchTwitterFollowerCount = async () => {
   // If not, you might need to adjust the data path
   const followerCount = data?.data?.public_metrics?.followers_count;
   console.log(`Follower Count: ${followerCount}`);
+
+  // Extract the metrics
+  const metrics = data?.data?.public_metrics;
+  console.log(`::set-output name=metrics::${JSON.stringify(metrics)}`);
 };
 
 fetchTwitterFollowerCount().catch(err => console.error(err));
