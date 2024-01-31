@@ -10,6 +10,10 @@ jobs:
   fetch_data:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      pull-requests: write
+
     steps:
       - name: Check out the repository
         uses: actions/checkout@v2
