@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Twitter Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .chart-container {
+      width: 80%;
+      max-width: 1000px;
+    }
+
+    canvas {
+      max-width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Twitter Dashboard</h1>
+
+  <h2>Number of Followers</h2>
+  <div class="chart-container">
+    <canvas id="followersChart"></canvas>
+  </div>
+
+  <h2>Number of Tweets</h2>
+  <div class="chart-container">
+    <canvas id="tweetsChart"></canvas>
+  </div>
+
+  <script>
+    fetch('data/x.json')
+      .then(response => response.json())
+      .then(data => {
+        const dates = data.map(item => item.date);
+        const followers = data.map(item => item.followers_count);
+        const tweets = data.map(item => item.tweet_count);
+
+        const minFollowers = Math.min(...followers) - 100;
+        const minTweets = Math.min(...tweets) - 100;
+
+        const followersCtx = document.getElementById('followersChart').getContext('2d');
+        const tweetsCtx = document.getElementById('tweetsChart').getContext('2d');
+
+        new Chart(followersCtx, {
+          type: 'line',
+          data: {
+            labels: dates,
+            datasets: [{
+              label: 'Followers',
+              data: followers,
+              backgroundColor: 'rgba(54, 162, 235, 0.2)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: false,
+                min: minFollowers
+              }
+            }
+          }
+        });
+
+        new Chart(tweetsCtx, {
+          type: 'line',
+          data: {
+            labels: dates,
+            datasets: [{
+              label: 'Tweets',
+              data: tweets,
+              backgroundColor: 'rgba(255, 99, 132, 0.2)',
+              borderColor: 'rgba(255, 99, 132, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: false,
+                min: minTweets
+              }
+            }
+          }
+        });
+      });
+  </script>
+</body>
+
+</html>
