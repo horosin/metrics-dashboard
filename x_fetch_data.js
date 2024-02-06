@@ -1,6 +1,7 @@
 require('dotenv').config();
 const OAuth = require('oauth-1.0a');
 const crypto = require('crypto');
+const fs = require('fs');
 
 // Initialize OAuth 1.0a
 const oauth = OAuth({
@@ -42,14 +43,12 @@ const fetchTwitterFollowerCount = async () => {
 
   const data = await response.json();
   console.log(data);
-  // Assuming the follower count is part of the returned data structure
-  // If not, you might need to adjust the data path
-  const followerCount = data?.data?.public_metrics?.followers_count;
-  console.log(`Follower Count: ${followerCount}`);
 
   // Extract the metrics
   const metrics = data?.data?.public_metrics;
-  console.log(`::set-output name=metrics::${JSON.stringify(metrics)}`);
+
+  // Write the metrics to the environment file
+  fs.appendFileSync(process.env.GITHUB_OUTPUT, `metrics=${JSON.stringify(metrics)}\n`);
 };
 
 fetchTwitterFollowerCount().catch(err => console.error(err));
