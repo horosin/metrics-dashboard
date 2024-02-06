@@ -48,7 +48,7 @@ const fetchTwitterFollowerCount = async () => {
   const metrics = data?.data?.public_metrics;
 
   // Write the metrics to the environment file
-  fs.appendFileSync(process.env.GITHUB_OUTPUT, `metrics=${JSON.stringify(metrics)}\n`);
+  fs.appendFileSync(process.env.GITHUB_OUTPUT, `METRICS="${JSON.stringify(metrics)}"\n`);
 };
 
 fetchTwitterFollowerCount().catch(err => console.error(err));

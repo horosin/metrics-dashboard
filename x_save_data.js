@@ -1,6 +1,7 @@
-// x_save_data.js
 const fs = require('fs');
-const metrics = JSON.parse(process.env.METRICS); // Parse the JSON string from the environment variable
+
+// Parse the JSON string from the environment variable
+const metrics = JSON.parse(process.env.METRICS);
 const path = './data/x.json';
 const now = new Date();
 const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;

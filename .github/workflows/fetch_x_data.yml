@@ -38,7 +38,7 @@ jobs:
       - name: Save data
         run: node x_save_data.js
         env:
-          METRICS: ${{ steps.fetch_data.outputs.metrics }}
+          METRICS: ${{ steps.fetch_data.outputs.METRICS }}
 
       - name: Commit and push if there's changes
         run: |
