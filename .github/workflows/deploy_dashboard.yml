@@ -1,6 +1,9 @@
 name: Deploy to GitHub Pages
 
 on:
+  schedule:
+    # Runs at 4:15 AM UTC (5:15 AM in Poland during Standard Time)
+    - cron: '15 4 * * *'
   push:
     branches:
       - main
