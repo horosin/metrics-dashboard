@@ -10,35 +10,82 @@
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 0;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
     .chart-container {
-      width: 80%;
+      width: 95%;
+      max-width: 1000px;
+      margin: 20px 0;
+    }
+
+    .stats-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      width: 95%;
       max-width: 1000px;
     }
 
-    canvas {
-      max-width: 100%;
+    .current-stats {
+      font-size: 1.2rem;
+      text-align: center;
+      margin: 10px 0;
+      padding: 15px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .change {
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
+
+    .positive-change {
+      color: #28a745;
+    }
+
+    .negative-change {
+      color: #dc3545;
     }
 
     h1 {
-      text-align: center;
-      margin-top: 20px;
+      font-size: clamp(1.5rem, 5vw, 2.5rem);
+      margin: 20px 0;
     }
 
     h2 {
-      text-align: center;
-      margin-top: 20px;
+      font-size: clamp(1rem, 3vw, 1.8rem);
+      margin: 15px 0;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
     }
   </style>
 </head>
 
 <body>
   <h1>Twitter Dashboard</h1>
+
+  <div class="stats-container">
+    <div class="current-stats">
+      <div id="currentFollowers">Followers: Loading...</div>
+      <div class="change" id="followersChange"></div>
+    </div>
+    <div class="current-stats">
+      <div id="currentTweets">Tweets: Loading...</div>
+      <div class="change" id="tweetsChange"></div>
+    </div>
+  </div>
 
   <h2>Number of Followers</h2>
   <div class="chart-container">
@@ -57,6 +104,29 @@
         const dates = data.map(item => item.date);
         const followers = data.map(item => item.followers_count);
         const tweets = data.map(item => item.tweet_count);
+
+        // Update current stats and changes
+        const currentFollowers = followers[followers.length - 1];
+        const previousFollowers = followers[followers.length - 2];
+        const followersDiff = currentFollowers - previousFollowers;
+
+        const currentTweets = tweets[tweets.length - 1];
+        const previousTweets = tweets[tweets.length - 2];
+        const tweetsDiff = currentTweets - previousTweets;
+
+        document.getElementById('currentFollowers').textContent = 
+          `Followers: ${currentFollowers.toLocaleString()}`;
+        document.getElementById('followersChange').textContent = 
+          `${followersDiff >= 0 ? '+' : ''}${followersDiff.toLocaleString()} since yesterday`;
+        document.getElementById('followersChange').className = 
+          `change ${followersDiff >= 0 ? 'positive-change' : 'negative-change'}`;
+
+        document.getElementById('currentTweets').textContent = 
+          `Tweets: ${currentTweets.toLocaleString()}`;
+        document.getElementById('tweetsChange').textContent = 
+          `${tweetsDiff >= 0 ? '+' : ''}${tweetsDiff.toLocaleString()} since yesterday`;
+        document.getElementById('tweetsChange').className = 
+          `change ${tweetsDiff >= 0 ? 'positive-change' : 'negative-change'}`;
 
         const minFollowers = Math.min(...followers) - 100;
         const minTweets = Math.min(...tweets) - 100;
