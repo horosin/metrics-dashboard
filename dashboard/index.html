@@ -1,110 +1,416 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Twitter Dashboard</title>
+  <title>Twitter/X Analytics Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --accent-color: #0ea5e9;
+      --border-color: #e2e8f0;
+      --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --positive: #22c55e;
+      --negative: #ef4444;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --accent-color: #38bdf8;
+      --border-color: #334155;
+      --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
       margin: 0;
       padding: 20px;
+      min-height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .dashboard-header {
+      width: 95%;
+      max-width: 1200px;
+      margin: 0 auto 30px;
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
       align-items: center;
     }
 
-    .chart-container {
-      width: 95%;
-      max-width: 1000px;
-      margin: 20px 0;
+    .theme-toggle {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      padding: 8px 16px;
+      border-radius: 8px;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .last-updated {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
     }
 
     .stats-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 20px;
       width: 95%;
-      max-width: 1000px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
     .current-stats {
-      font-size: 1.2rem;
-      text-align: center;
-      margin: 10px 0;
-      padding: 15px;
-      background: #f5f5f5;
-      border-radius: 8px;
-      flex: 1;
-      min-width: 250px;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--border-color);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .current-stats:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px -1px rgb(0 0 0 / 0.15);
+    }
+
+    .stat-title {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var (--accent-color);
     }
 
     .change {
       font-size: 0.9rem;
-      margin-top: 8px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: var(--bg-primary);
+      display: inline-block;
+      margin: 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .positive-change {
-      color: #28a745;
+      color: var(--positive);
     }
 
     .negative-change {
-      color: #dc3545;
+      color: var(--negative);
+    }
+
+    .chart-section {
+      width: 95%;
+      max-width: 1200px;
+      margin: 30px auto;
+      background: var(--bg-secondary);
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--border-color);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
     }
 
     h1 {
-      font-size: clamp(1.5rem, 5vw, 2.5rem);
-      margin: 20px 0;
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin: 0;
     }
 
     h2 {
-      font-size: clamp(1rem, 3vw, 1.8rem);
-      margin: 15px 0;
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    @media (max-width: 600px) {
-      body {
-        padding: 10px;
+    @media (max-width: 768px) {
+      .dashboard-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
       }
+
+      .stat-value {
+        font-size: 1.5rem;
+      }
+    }
+
+    /* Loading animation */
+    .loading {
+      opacity: 0.7;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.7; }
+      50% { opacity: 0.4; }
+      100% { opacity: 0.7; }
+    }
+
+    .icon {
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    .social-container {
+      width: 95%;
+      max-width: 1200px;
+      margin: 0 auto 30px;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .social-link {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 20px;
+      color: var(--text-primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .social-link:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--card-shadow);
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+    }
+
+    .social-link .icon {
+      margin: 0;
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Move footer links to end of page */
+    .footer {
+      margin-top: auto;
     }
   </style>
 </head>
-
 <body>
-  <h1>Twitter Dashboard</h1>
+  <div class="dashboard-header">
+    <div>
+      <h1>Twitter/X Analytics</h1>
+      <div class="last-updated" id="lastUpdated">
+        <i data-lucide="clock" class="icon"></i>
+        Last updated: Loading...
+      </div>
+    </div>
+    <button class="theme-toggle" id="themeToggle">
+      <i data-lucide="sun" class="icon"></i>
+      <i data-lucide="moon" class="icon" style="display: none;"></i>
+      Toggle Theme
+    </button>
+  </div>
+
+  <div class="social-container">
+    <a href="https://horosin.com" target="_blank" rel="noopener" class="social-link">
+      <i data-lucide="notebook" class="icon"></i>
+      horosin.com
+    </a>
+    <a href="https://x.com/horosin_" target="_blank" rel="noopener" class="social-link">
+      <i data-lucide="twitter" class="icon"></i>
+      @horosin_
+    </a>
+    <a href="https://linkedin.com/in/horosin" target="_blank" rel="noopener" class="social-link">
+      <i data-lucide="linkedin" class="icon"></i>
+      LinkedIn
+    </a>
+  </div>
 
   <div class="stats-container">
     <div class="current-stats">
-      <div id="currentFollowers">Followers: Loading...</div>
+      <div class="stat-title">
+        <i data-lucide="users" class="icon"></i>
+        Total Followers
+      </div>
+      <div class="stat-value" id="currentFollowers">Loading...</div>
       <div class="change" id="followersChange"></div>
       <div class="change" id="followersWeekChange"></div>
     </div>
     <div class="current-stats">
-      <div id="currentTweets">Tweets: Loading...</div>
+      <div class="stat-title">
+        <i data-lucide="message-square" class="icon"></i>
+        Total Posts
+      </div>
+      <div class="stat-value" id="currentTweets">Loading...</div>
       <div class="change" id="tweetsChange"></div>
       <div class="change" id="tweetsWeekChange"></div>
     </div>
   </div>
 
-  <h2>Number of Followers</h2>
-  <div class="chart-container">
-    <canvas id="followersChart"></canvas>
-  </div>
-
-  <h2>Number of Tweets</h2>
-  <div class="chart-container">
-    <canvas id="tweetsChart"></canvas>
+  <div class="chart-section">
+    <div class="chart-header">
+      <h2>
+        <i data-lucide="line-chart" class="icon"></i>
+        Metrics Overview
+      </h2>
+    </div>
+    <canvas id="metricsChart"></canvas>
   </div>
 
   <script>
-    let followersChart, tweetsChart;  // Declare charts globally
+    // Initialize all icons
+    lucide.createIcons();
+
+    // Theme toggling
+    const themeToggle = document.getElementById('themeToggle');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    function setTheme(isDark) {
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      document.querySelector('[data-lucide="sun"]').style.display = isDark ? 'block' : 'none';
+      document.querySelector('[data-lucide="moon"]').style.display = isDark ? 'none' : 'block';
+    }
+
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      setTheme(savedTheme === 'dark');
+    } else {
+      setTheme(prefersDark.matches);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      setTheme(!isDark);
+    });
+
+    let metricsChart;
+
+    const chartOptions = {
+      responsive: true,
+      maintainAspectRatio: true,
+      interaction: {
+        mode: 'index',
+        intersect: false,
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: {
+            usePointStyle: true,
+            padding: 15,
+            font: {
+              family: 'Inter'
+            }
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          padding: 12,
+          bodyFont: {
+            family: 'Inter'
+          }
+        }
+      },
+      elements: {
+        line: {
+          tension: 0.4
+        },
+        point: {
+          radius: 2,
+          hoverRadius: 6
+        }
+      },
+      scales: {
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          title: {
+            display: true,
+            text: 'Followers',
+            color: 'rgb(14, 165, 233)',
+            font: {
+              family: 'Inter'
+            }
+          },
+          grid: {
+            drawOnChartArea: false
+          }
+        },
+        y1: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          title: {
+            display: true,
+            text: 'Tweets',
+            color: 'rgb(255, 99, 132)',
+            font: {
+              family: 'Inter'
+            }
+          },
+          grid: {
+            drawOnChartArea: false
+          }
+        }
+      }
+    };
 
     fetch('data/x.json')
       .then(response => response.json())
       .then(data => {
+        // Update last updated time
+        const lastDate = new Date(data[data.length - 1].date);
+        document.getElementById('lastUpdated').textContent = 
+          `Last updated: ${lastDate.toLocaleDateString()} ${lastDate.toLocaleTimeString()}`;
+
         const dates = data.map(item => item.date);
         const followers = data.map(item => item.followers_count);
         const tweets = data.map(item => item.tweet_count);
@@ -127,88 +433,74 @@
 
         // Update daily stats
         document.getElementById('currentFollowers').textContent = 
-          `Followers: ${currentFollowers.toLocaleString()}`;
-        document.getElementById('followersChange').textContent = 
-          `${followersDiff >= 0 ? '+' : ''}${followersDiff.toLocaleString()} since yesterday`;
+          `${currentFollowers.toLocaleString()}`;
+        document.getElementById('followersChange').innerHTML = 
+          createChangeHTML(followersDiff, 'yesterday');
         document.getElementById('followersChange').className = 
           `change ${followersDiff >= 0 ? 'positive-change' : 'negative-change'}`;
-        document.getElementById('followersWeekChange').textContent = 
-          `${followersWeekDiff >= 0 ? '+' : ''}${followersWeekDiff.toLocaleString()} since last week`;
+        document.getElementById('followersWeekChange').innerHTML = 
+          createChangeHTML(followersWeekDiff, 'last week');
         document.getElementById('followersWeekChange').className = 
           `change ${followersWeekDiff >= 0 ? 'positive-change' : 'negative-change'}`;
 
         document.getElementById('currentTweets').textContent = 
-          `Tweets: ${currentTweets.toLocaleString()}`;
-        document.getElementById('tweetsChange').textContent = 
-          `${tweetsDiff >= 0 ? '+' : ''}${tweetsDiff.toLocaleString()} since yesterday`;
+          `${currentTweets.toLocaleString()}`;
+        document.getElementById('tweetsChange').innerHTML = 
+          createChangeHTML(tweetsDiff, 'yesterday');
         document.getElementById('tweetsChange').className = 
           `change ${tweetsDiff >= 0 ? 'positive-change' : 'negative-change'}`;
-        document.getElementById('tweetsWeekChange').textContent = 
-          `${tweetsWeekDiff >= 0 ? '+' : ''}${tweetsWeekDiff.toLocaleString()} since last week`;
+        document.getElementById('tweetsWeekChange').innerHTML = 
+          createChangeHTML(tweetsWeekDiff, 'last week');
         document.getElementById('tweetsWeekChange').className = 
           `change ${tweetsWeekDiff >= 0 ? 'positive-change' : 'negative-change'}`;
 
         const minFollowers = Math.min(...followers) - 100;
         const minTweets = Math.min(...tweets) - 100;
 
-        const followersCtx = document.getElementById('followersChart').getContext('2d');
-        const tweetsCtx = document.getElementById('tweetsChart').getContext('2d');
+        const ctx = document.getElementById('metricsChart').getContext('2d');
 
-        followersChart = new Chart(followersCtx, {
+        metricsChart = new Chart(ctx, {
           type: 'line',
           data: {
             labels: dates,
-            datasets: [{
-              label: 'Followers',
-              data: followers,
-              backgroundColor: 'rgba(54, 162, 235, 0.2)',
-              borderColor: 'rgba(54, 162, 235, 1)',
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            scales: {
-              y: {
-                beginAtZero: false,
-                min: minFollowers
+            datasets: [
+              {
+                label: 'Followers',
+                data: followers,
+                backgroundColor: 'rgba(14, 165, 233, 0.2)',
+                borderColor: 'rgb(14, 165, 233)',
+                borderWidth: 2,
+                yAxisID: 'y',
+                fill: true
+              },
+              {
+                label: 'Tweets',
+                data: tweets,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgb(255, 99, 132)',
+                borderWidth: 2,
+                yAxisID: 'y1',
+                fill: true
               }
-            }
-          }
+            ]
+          },
+          options: chartOptions
         });
 
-        tweetsChart = new Chart(tweetsCtx, {
-          type: 'line',
-          data: {
-            labels: dates,
-            datasets: [{
-              label: 'Tweets',
-              data: tweets,
-              backgroundColor: 'rgba(255, 99, 132, 0.2)',
-              borderColor: 'rgba(255, 99, 132, 1)',
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            scales: {
-              y: {
-                beginAtZero: false,
-                min: minTweets
-              }
-            }
-          }
-        });
+        // Remove loading states
+        document.querySelectorAll('.loading').forEach(el => el.classList.remove('loading'));
       });
 
     // Add window resize handler
     window.addEventListener('resize', () => {
-      if (followersChart) followersChart.resize();
-      if (tweetsChart) tweetsChart.resize();
+      if (metricsChart) metricsChart.resize();
     });
+
+    // Update the change display code to include trending icons
+    const createChangeHTML = (value, period) => {
+      const icon = value >= 0 ? 'trending-up' : 'trending-down';
+      return `<i data-lucide="${icon}" class="icon"></i>${value >= 0 ? '+' : ''}${value.toLocaleString()} since ${period}`;
+    };
   </script>
 </body>
-
 </html>
