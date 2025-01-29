@@ -80,10 +80,12 @@
     <div class="current-stats">
       <div id="currentFollowers">Followers: Loading...</div>
       <div class="change" id="followersChange"></div>
+      <div class="change" id="followersWeekChange"></div>
     </div>
     <div class="current-stats">
       <div id="currentTweets">Tweets: Loading...</div>
       <div class="change" id="tweetsChange"></div>
+      <div class="change" id="tweetsWeekChange"></div>
     </div>
   </div>
 
@@ -98,6 +100,8 @@
   </div>
 
   <script>
+    let followersChart, tweetsChart;  // Declare charts globally
+
     fetch('data/x.json')
       .then(response => response.json())
       .then(data => {
@@ -105,7 +109,7 @@
         const followers = data.map(item => item.followers_count);
         const tweets = data.map(item => item.tweet_count);
 
-        // Update current stats and changes
+        // Calculate daily changes
         const currentFollowers = followers[followers.length - 1];
         const previousFollowers = followers[followers.length - 2];
         const followersDiff = currentFollowers - previousFollowers;
@@ -114,12 +118,24 @@
         const previousTweets = tweets[tweets.length - 2];
         const tweetsDiff = currentTweets - previousTweets;
 
+        // Calculate weekly changes
+        const weekAgoIndex = Math.max(0, followers.length - 8); // 7 days ago
+        const weekAgoFollowers = followers[weekAgoIndex];
+        const weekAgoTweets = tweets[weekAgoIndex];
+        const followersWeekDiff = currentFollowers - weekAgoFollowers;
+        const tweetsWeekDiff = currentTweets - weekAgoTweets;
+
+        // Update daily stats
         document.getElementById('currentFollowers').textContent = 
           `Followers: ${currentFollowers.toLocaleString()}`;
         document.getElementById('followersChange').textContent = 
           `${followersDiff >= 0 ? '+' : ''}${followersDiff.toLocaleString()} since yesterday`;
         document.getElementById('followersChange').className = 
           `change ${followersDiff >= 0 ? 'positive-change' : 'negative-change'}`;
+        document.getElementById('followersWeekChange').textContent = 
+          `${followersWeekDiff >= 0 ? '+' : ''}${followersWeekDiff.toLocaleString()} since last week`;
+        document.getElementById('followersWeekChange').className = 
+          `change ${followersWeekDiff >= 0 ? 'positive-change' : 'negative-change'}`;
 
         document.getElementById('currentTweets').textContent = 
           `Tweets: ${currentTweets.toLocaleString()}`;
@@ -127,6 +143,10 @@
           `${tweetsDiff >= 0 ? '+' : ''}${tweetsDiff.toLocaleString()} since yesterday`;
         document.getElementById('tweetsChange').className = 
           `change ${tweetsDiff >= 0 ? 'positive-change' : 'negative-change'}`;
+        document.getElementById('tweetsWeekChange').textContent = 
+          `${tweetsWeekDiff >= 0 ? '+' : ''}${tweetsWeekDiff.toLocaleString()} since last week`;
+        document.getElementById('tweetsWeekChange').className = 
+          `change ${tweetsWeekDiff >= 0 ? 'positive-change' : 'negative-change'}`;
 
         const minFollowers = Math.min(...followers) - 100;
         const minTweets = Math.min(...tweets) - 100;
@@ -134,7 +154,7 @@
         const followersCtx = document.getElementById('followersChart').getContext('2d');
         const tweetsCtx = document.getElementById('tweetsChart').getContext('2d');
 
-        new Chart(followersCtx, {
+        followersChart = new Chart(followersCtx, {
           type: 'line',
           data: {
             labels: dates,
@@ -147,6 +167,8 @@
             }]
           },
           options: {
+            responsive: true,
+            maintainAspectRatio: true,
             scales: {
               y: {
                 beginAtZero: false,
@@ -156,7 +178,7 @@
           }
         });
 
-        new Chart(tweetsCtx, {
+        tweetsChart = new Chart(tweetsCtx, {
           type: 'line',
           data: {
             labels: dates,
@@ -169,6 +191,8 @@
             }]
           },
           options: {
+            responsive: true,
+            maintainAspectRatio: true,
             scales: {
               y: {
                 beginAtZero: false,
@@ -178,6 +202,12 @@
           }
         });
       });
+
+    // Add window resize handler
+    window.addEventListener('resize', () => {
+      if (followersChart) followersChart.resize();
+      if (tweetsChart) tweetsChart.resize();
+    });
   </script>
 </body>
 
