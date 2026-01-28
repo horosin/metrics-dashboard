@@ -42,8 +42,8 @@ jobs:
 
       - name: Commit and push if there's changes
         run: |
-          git config --global user.email "action@github.com"
-          git config --global user.name "GitHub Action"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
           git add data/x.json
           git commit -m "Update data for Platform X" || exit 0  # exit 0 if no changes
           git push
